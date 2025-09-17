@@ -1,6 +1,7 @@
 import Bar from "../common/bar/bar";
 import { Book, CatalogueItem, changeValueWithNewObj, getSpecialParent, Progress } from "../common/common";
 import Pagination from "../common/pagination/pagination";
+import Layout from '../common/layout/layout';
 
 class Catalogue {
     element: HTMLElement;
@@ -46,10 +47,11 @@ class Catalogue {
             this.pagination.checkPage(Math.ceil(list.length / this.linePerPage));
             this.pagination.setPage(Math.floor(this.progress.index / this.linePerPage));
         });
+        
         window.Bind.bindView(this.element.querySelector('.article-list'), this, 'pageList', (list: CatalogueItem[]) => {
             let html = `
                 <style>
-                    .article-item {line-height: 80px;}
+                    .article-item {line-height: ${window.Layout.articleLineHeight}px;}
                 </style>
             `;
             list.forEach((article) => {
@@ -101,18 +103,18 @@ class Catalogue {
     }
 
     checkHeight(): void {
-        let height = this.element.offsetHeight - 230 - 20;
-        let oo = height % 80;
+        let height = window.Layout.getContentAvailableHeight(this.element.offsetHeight);
+        let oo = height % window.Layout.articleLineHeight;
         if (oo < 10) {
-            oo += 80;
+            oo += window.Layout.articleLineHeight;
         }
         this.oo = oo;
-        this.linePerPage = Math.round((height - oo) / 80) * 2;
+        this.linePerPage = Math.round((height - oo) / window.Layout.articleLineHeight) * 2;
         const current: HTMLElement = this.element.querySelector('.current-info');
         const content: HTMLElement = this.element.querySelector('.content');
         current.style.height = `${oo}px`;
         current.style.lineHeight = `${oo}px`;
-        content.style.height = `${height - oo + 20}px`;
+        content.style.height = `${height - oo + window.Layout.scrollHack}px`;
     }
 
 

@@ -28,14 +28,15 @@ function init() {
     new Layout();
 
     new Api();
-
-    document.querySelector('.global-style').innerHTML = `
-        <style>
-            .page .content {
-                height: ${document.body.offsetHeight - 230}px;
-            }
-        </style>
-    `;
+    
+    document.documentElement.style.setProperty('--scrollHack', `${window.Layout.scrollHack}px`);
+    document.documentElement.style.setProperty('--barHeight', `${window.Layout.barHeight}px`);
+    
+    const controlHeight = window.Layout.controlHeight + 2*window.Layout.scrollHack;
+    document.documentElement.style.setProperty('--controlHeight', `${controlHeight}px`);
+    
+    const contentHeight = document.body.offsetHeight - window.Layout.bottomTotalHeight;
+    document.documentElement.style.setProperty('--contentHeight', `${contentHeight}px`);
 
     window.Config = new Config();
 

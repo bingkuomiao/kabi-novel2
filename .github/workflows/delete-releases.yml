@@ -1,0 +1,66 @@
+name: Delete Previous Releases
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  delete-all:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete all releases and tags
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // 1. 删除所有release及其资产
+            console.log("开始删除所有release...");
+            const releases = await github.rest.repos.listReleases({ owner, repo });
+            
+            for (const release of releases.data) {
+              console.log(`处理release: ${release.name} (ID: ${release.id})`);
+              
+              // 删除release资产
+              if (release.assets && release.assets.length > 0) {
+                for (const asset of release.assets) {
+                  await github.rest.repos.deleteReleaseAsset({
+                    owner, repo, asset_id: asset.id
+                  });
+                  console.log(`  已删除资产: ${asset.name}`);
+                }
+              }
+              
+              // 删除release本身
+              await github.rest.repos.deleteRelease({
+                owner, repo, release_id: release.id
+              });
+              console.log(`  已删除release: ${release.name}`);
+            }
+
+            // 2. 删除所有tag
+            console.log("\n开始删除所有tag...");
+            const tags = await github.rest.repos.listTags({ owner, repo });
+            
+            for (const tag of tags.data) {
+              const tagRef = `tags/${tag.name}`;
+              try {
+                await github.rest.git.deleteRef({
+                  owner, repo, ref: tagRef
+                });
+                console.log(`已删除tag: ${tag.name}`);
+              } catch (error) {
+                console.log(`删除tag ${tag.name} 失败: ${error.message}`);
+              }
+            }
+
+            console.log("\n所有release和tag已删除完成");
+    
+
+            console.log("\n===== 所有操作执行完毕 =====");
+    

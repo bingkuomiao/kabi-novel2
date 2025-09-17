@@ -2,6 +2,7 @@ import Catalogue from "../catalogue/catalogue";
 import Bar from "../common/bar/bar";
 import { Book, CatalogueItem, changeValueWithNewObj, Progress } from "../common/common";
 import Pagination from "../common/pagination/pagination";
+import Layout from '../common/layout/layout';
 
 class Article {
     element: HTMLElement;
@@ -61,7 +62,7 @@ class Article {
             if (this.progress.pos > this.content.length) {
                 return;
             }
-            window.Api.saveProgress(this.currentBook, this.progress);
+             window.Api.saveProgress(this.currentBook.source, this.progress.index);
         });
 
         const current: HTMLElement = this.element.querySelector('.current-info');
@@ -80,7 +81,8 @@ class Article {
             if (!this.element.offsetHeight) {
                 return '';
             }
-            let base = this.element.offsetHeight - 230 - 20;
+            
+            let base = window.Layout.getContentAvailableHeight(this.element.offsetHeight);
             let oo = base % window.Layout.lineHeight;
             if (oo < 10) {
                 oo += window.Layout.lineHeight;

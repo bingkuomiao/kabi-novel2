@@ -39,6 +39,58 @@ function changeValueWithNewObj(obj: any, target: {[key: string]: any}): any {
     return result;
 }
 
+function formatParams(data: { [key: string]: any }): string {
+  return Object.keys(data)
+    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+    .join('&');
+}
+
+function ajax(url: string, options: {
+  type?: 'GET' | 'POST';
+  data?: { [key: string]: any };
+  dataType?: 'json';
+  success?: (resp: any) => void;
+  error?: (resp: any, status: number) => void;
+}) {
+  options = options || {};
+  const type = (options.type || 'GET').toUpperCase();
+  const dataType = (options.dataType || 'json').toLowerCase();
+  const data = options.data || {};
+  const xhr = new XMLHttpRequest();
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      const status = xhr.status;
+      let resp;
+      try {
+        resp = dataType === 'json' ? JSON.parse(xhr.responseText) : xhr.responseText;
+      } catch (e) {
+        resp = xhr.responseText;
+      }
+
+      if (status >= 200 && status < 300) {
+        options.success && options.success(resp);
+      } else {
+        options.error && options.error(resp, status);
+      }
+    }
+  };
+
+  if (type === 'GET') {
+    const params = formatParams(data);
+    xhr.open('GET', `${url}${params ? '?' + params : ''}`, true);
+    xhr.send(null);
+  } 
+
+  else if (type === 'POST') {
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.send(JSON.stringify(data));
+  }
+
+  return xhr;
+}
+
 interface Book {
     id: string;
     source: string;
@@ -64,5 +116,5 @@ interface Progress {
     title: string;
 }
 
+export { strToDom, makeDisplayText, getSpecialParent, getObject, changeValueWithNewObj, formatParams, ajax, Book, CatalogueItem, Progress};
 
-export { strToDom, makeDisplayText, getSpecialParent, getObject, changeValueWithNewObj, Book, CatalogueItem, Progress };

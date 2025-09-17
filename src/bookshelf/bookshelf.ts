@@ -28,8 +28,6 @@ class BookShelf {
         });
 
         this.bookList = window.Store.getObj('bookshelf') || [];
-        // this.bookList = window.Store.getByHead('b_').map(v => JSON.parse(window.Store.get(v) || ''));//wait
-
         window.Bind.bindView(this.element.querySelector('.book-list'), this, 'bookList', (bookList: Book[], oldV: Book[] = []) => {
             this.compareBookList(bookList, oldV);
             let height = (this.element.querySelector('.pagination-box') as HTMLElement).offsetHeight / 4;
@@ -38,7 +36,10 @@ class BookShelf {
             let html = `
                 <style>
                     .book-item {height: ${height}px;}
-                    .book-item .book-cover {width: ${imgWidth}px;}
+                    .book-item .book-cover {
+                        width: ${imgWidth}px;
+                        background-color: #fff;
+                    }
                     .book-item .book-info {width: ${width - imgWidth - 30}px;}
                 </style>
             `;
@@ -47,8 +48,8 @@ class BookShelf {
                 let progress: Progress = window.Store.getObj(`p_${book.id}`);
                 html += `
                     <div class="book-item" key="${book.id}">
-                        <div class="book-cover" style="background-image: url(${book.customCoverUrl});">
-                            <img src="${book.coverUrl}" alt="${book.name}"/>
+                        <div class="book-cover">
+                            <!-- 移除图片标签，不加载任何图片 -->
                         </div>
                         <div class="book-info">
                             <div class="book-name">${book.name}</div>
@@ -59,7 +60,7 @@ class BookShelf {
                         </div>
                     </div>
                 `;
-            });
+             });
             window.setTimeout(() => {
                 this.pagination.checkPage();
             });
